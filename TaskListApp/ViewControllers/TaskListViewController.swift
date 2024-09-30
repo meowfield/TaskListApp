@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 final class TaskListViewController: UITableViewController {
     private var taskList: [ToDoTask] = []
@@ -24,15 +25,16 @@ final class TaskListViewController: UITableViewController {
     }
     
     private func fetchData() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let fetchRequest = ToDoTask.fetchRequest()
-        
-        do {
-           taskList = try appDelegate.persistentContainer.viewContext.fetch(fetchRequest)
-        } catch {
-            print(error)
+            let context = StorageManager.shared.persistentContainer.viewContext
+            let fetchRequest: NSFetchRequest<ToDoTask> = ToDoTask.fetchRequest()
+            
+            do {
+               taskList = try context.fetch(fetchRequest)
+               tableView.reloadData()
+            } catch {
+                print("Failed to fetch data:", error)
+            }
         }
-    }
     
     private func showAlert(withTitle title: String, andMessage message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -50,15 +52,15 @@ final class TaskListViewController: UITableViewController {
     }
     
     private func save(_ taskName: String) {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let task = ToDoTask(context: appDelegate.persistentContainer.viewContext)
+        let storageManager = StorageManager.shared
+        let task = ToDoTask(context: storageManager.persistentContainer.viewContext)
         task.title = taskName
         taskList.append(task)
         
         let indexPath = IndexPath(row: taskList.count - 1, section: 0)
         tableView.insertRows(at: [indexPath], with: .automatic)
         
-        appDelegate.saveContext()
+        storageManager.saveContext()
     }
 }
 
@@ -105,3 +107,4 @@ private extension TaskListViewController {
         navigationController?.navigationBar.tintColor = .white
     }
 }
+
