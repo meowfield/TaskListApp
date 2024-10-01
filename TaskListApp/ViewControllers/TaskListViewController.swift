@@ -9,9 +9,11 @@ import UIKit
 import CoreData
 
 final class TaskListViewController: UITableViewController {
+    // MARK: - Private Properties
     private var taskList: [ToDoTask] = []
     private let cellID = "task"
     
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
@@ -20,8 +22,33 @@ final class TaskListViewController: UITableViewController {
         fetchData()
     }
     
+    // MARK: - Private Methods
     @objc private func addNewTask() {
-        showAlert(withTitle: "New Task", andMessage: "What do you want to do&")
+        showAlert(withTitle: "New Task", andMessage: "What do you want to do?")
+    }
+    
+    private func updateTask(for task: ToDoTask) {
+        let alert = UIAlertController(title: "Update Task", message: "What do you want to do?", preferredStyle: .alert)
+        let saveAction = UIAlertAction(title: "Update", style: .default) { [weak self] _ in
+                   guard let newTitle = alert.textFields?.first?.text, !newTitle.isEmpty else { return }
+                   self?.update(task, withTitle: newTitle)
+               }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        alert.addTextField { textField in
+            textField.text = task.title
+        }
+        present(alert, animated: true)
+    }
+    
+    private func deleteTask(at indexPath: IndexPath) {
+        let taskToRemove = taskList[indexPath.row]
+        StorageManager.shared.persistentContainer.viewContext.delete(taskToRemove)
+        
+        taskList.remove(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .fade)
+        StorageManager.shared.saveContext()
     }
     
     private func fetchData() {
@@ -62,6 +89,15 @@ final class TaskListViewController: UITableViewController {
         
         storageManager.saveContext()
     }
+    
+    private func update(_ task: ToDoTask, withTitle newTitle: String) {
+            task.title = newTitle
+            if let index = taskList.firstIndex(of: task) {
+                let indexPath = IndexPath(row: index, section: 0)
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+            StorageManager.shared.saveContext()
+        }
 }
 
 // MARK: - UITableViewDataSource
@@ -77,6 +113,18 @@ extension TaskListViewController {
         content.text = toDoTask.title
         cell.contentConfiguration = content
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let task = taskList[indexPath.row]
+        updateTask(for: task)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            deleteTask(at: indexPath)
+        }
     }
 }
 
