@@ -75,6 +75,30 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		92E9B2AD2CAC4FAA00060EC6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				928021F72CAAD1F8009565ED /* StorageManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		92E9B2AE2CAC500500060EC6 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A8F9D4D92B79350400B80334 /* TaskListApp.xcdatamodeld */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		92E9B2AF2CAC501100060EC6 /* Factories */ = {
+			isa = PBXGroup;
+			children = (
+				A8F9D4E92B7944C700B80334 /* FilledButtonFactory.swift */,
+			);
+			path = Factories;
+			sourceTree = "<group>";
+		};
 		A8F9D4C42B79350400B80334 = {
 			isa = PBXGroup;
 			children = (
@@ -96,11 +120,11 @@
 			children = (
 				928021F52CAACE96009565ED /* App */,
 				928021B52CA9F510009565ED /* ViewControllers */,
-				A8F9D4E92B7944C700B80334 /* FilledButtonFactory.swift */,
-				928021F72CAAD1F8009565ED /* StorageManager.swift */,
+				92E9B2AF2CAC501100060EC6 /* Factories */,
+				92E9B2AE2CAC500500060EC6 /* Models */,
+				92E9B2AD2CAC4FAA00060EC6 /* Services */,
 				928021F62CAACED7009565ED /* Resources */,
 				928021F22CAACE51009565ED /* Storyboards */,
-				A8F9D4D92B79350400B80334 /* TaskListApp.xcdatamodeld */,
 			);
 			path = TaskListApp;
 			sourceTree = "<group>";
