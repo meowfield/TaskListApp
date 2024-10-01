@@ -27,21 +27,6 @@ final class TaskListViewController: UITableViewController {
         showAlert(withTitle: "New Task", andMessage: "What do you want to do?")
     }
     
-    private func updateTask(for task: ToDoTask) {
-        let alert = UIAlertController(title: "Update Task", message: "What do you want to do?", preferredStyle: .alert)
-        let saveAction = UIAlertAction(title: "Update", style: .default) { [weak self] _ in
-                   guard let newTitle = alert.textFields?.first?.text, !newTitle.isEmpty else { return }
-                   self?.update(task, withTitle: newTitle)
-               }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
-        alert.addAction(saveAction)
-        alert.addAction(cancelAction)
-        alert.addTextField { textField in
-            textField.text = task.title
-        }
-        present(alert, animated: true)
-    }
-    
     private func deleteTask(at indexPath: IndexPath) {
         let taskToRemove = taskList[indexPath.row]
         StorageManager.shared.persistentContainer.viewContext.delete(taskToRemove)
@@ -63,17 +48,32 @@ final class TaskListViewController: UITableViewController {
             }
         }
     
-    private func showAlert(withTitle title: String, andMessage message: String) {
+    private func showAlert(
+        withTitle title: String,
+        andMessage message: String,
+        task: ToDoTask? = nil
+    ) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let saveAction = UIAlertAction(title: "Save Task", style: .default) { [unowned self] _ in
-            guard let taskName = alert.textFields?.first?.text, !taskName.isEmpty else { return }
-            save(taskName)
+        let saveAction = UIAlertAction(
+            title: task == nil ? "Add" : "Update",
+            style: .default
+        ) { [weak self] _ in
+            guard let taskName = alert.textFields?.first?.text, !taskName.isEmpty else {
+                return
+            }
+            if let task = task {
+                self?.update(task, withTitle: taskName)
+            } else {
+                self?.save(taskName)
+            }
         }
+        
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
         alert.addTextField { textField in
-            textField.placeholder = "New Task"
+            textField.placeholder = "Task Name"
+            textField.text = task?.title
         }
         present(alert, animated: true)
     }
@@ -102,11 +102,17 @@ final class TaskListViewController: UITableViewController {
 
 // MARK: - UITableViewDataSource
 extension TaskListViewController {
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         taskList.count
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
         let toDoTask = taskList[indexPath.row]
         var content = cell.defaultContentConfiguration()
@@ -115,9 +121,12 @@ extension TaskListViewController {
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    override func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         let task = taskList[indexPath.row]
-        updateTask(for: task)
+        showAlert(withTitle: "Update Task", andMessage: "What do you want to do?", task: task)
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
